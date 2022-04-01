@@ -2,10 +2,10 @@
 import pandas as pd
 
 # metadata file. Ensure xlsx or csv is saved as CSV UTF-8 format
-filename = r"\\hgdata1\db\Secured\Song\00646 1161059 BC Ltd\00646 Exported from Worldox\File-Admin\Worldox metadata 00646.csv"
+filename = r"\\filepath\Worldox metadata.csv"
 # Copy all files into 1 folder
 # extract actual file paths from folder with CTRL a + SHIFT - right-click - Copy as Path
-# eg. C:\Users\dfast\Downloads\RESEARCHES\STREET.PDF...
+# eg. C:\Users\username\Downloads\file.PDF...
 # paste into metadata csv file under location (sort data first in another excel sheet A->Z)
 # ensure location column aligns with the description column
 # edit as necessary (usually more metadata than available files, delete extra metadata rows)
@@ -42,9 +42,6 @@ di = {
     'Cabinet': 'Matter',
     '#6 (Lawyer)': 'CREATED BY',
     'Owner': 'LAST MODIFIED BY',
-    # column data replace
-    'SXUE': 'Song Xue',
-    'ALI': 'Aileena Li',
 }
 
 # extract required columns from csv first (Based on Worldox Descriptions)
@@ -56,24 +53,16 @@ for df in [df]: df.rename(columns=di, inplace=True)
 # Apply dictionary replace to specific column contents
 df['DocType'] = df['DocType'].map(di)
 df['Author'] = df['Author'].map(di)
-df['LAST MODIFIED BY'] = 'Song Xue'
-df['Client'] = '25093'
-df['Matter'] = '153069'
+df['LAST MODIFIED BY'] = 'username'
+df['Client'] = '12345'
+df['Matter'] = '54321'
 df['CREATED BY'] = df['CREATED BY'].map(di)
 
-# remove directory path from filenames. Ensure to use \\ for all \
-# remove extension from the description as well
-# df['DOCUMENT NAME'] = df['DOCUMENT NAME'].str.replace(r"C:\\Users\\dfast\\Downloads\\RESEARCHES\\", "")
-# df['DOCUMENT NAME'] = df['DOCUMENT NAME'].str.replace(r".PDF", "")
-# df['DOCUMENT NAME'] = df['DOCUMENT NAME'].str.replace(r".MSG", "")
-# df['DOCUMENT NAME'] = df['DOCUMENT NAME'].str.replace(r".PDF", "")
-# df['DOCUMENT NAME'] = df['DOCUMENT NAME'].str.replace(r".DOCX", "")
-# df['DOCUMENT NAME'] = df['DOCUMENT NAME'].str.replace(r".DOC", "")
-# df['DOCUMENT NAME'] = df['DOCUMENT NAME'].str.replace(r".XLSX", "")
-
 # convert dataframe to csv and export
-df.to_csv(r'\\hgdata1\db\Secured\Song\00646 1161059 BC Ltd\00646 Exported from Worldox\File-Admin\00646_ImportReady.csv', index = False)
+df.to_csv(r'\\filepath\ImportReady.csv', index = False)
 
 # print to console
 pd.options.display.width = 0
 print(df)
+
+#upload using our csv file via ndimport tool
