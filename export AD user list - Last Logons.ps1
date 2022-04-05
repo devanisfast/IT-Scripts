@@ -1,0 +1,1 @@
+﻿Get-ADUser -Filter * -SearchBase "OU=ADMINS,DC=DOMAIN,DC=INTERNAL" -properties "LastLogonDate" | export-csv -Path "\\filepath\Admin Accounts Logons.csv"
