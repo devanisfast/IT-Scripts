@@ -1,0 +1,2 @@
+$APP = get-wmiobject Win32_Product | where name -like "Application Name" | Select-Object -ExpandProperty "Identifyingnumber"
+MsiExec.exe /qn /norestart /X$APP
