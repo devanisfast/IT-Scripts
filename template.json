@@ -1,0 +1,172 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_template_vm_123_name": {
+            "type": "String"
+        },
+        "virtualNetworks_hgvmnet_spoke_prd_01_externalid": {
+            "defaultValue": "/subscriptions/Subscription-ID-Here/resourceGroups/Resource-Group-Here/providers/Microsoft.Network/virtualNetworks/virtual-network-here",
+            "type": "String"
+        },
+        "adminPassword": {
+            "type": "secureString"
+        },
+        "domainUser": {
+            "type": "string"
+        },
+        "domainPassword": {
+            "type": "securestring"
+        },
+        "domainToJoin": {
+            "type": "string",
+            "defaultValue": "harpergrey.internal"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(parameters('virtualMachines_template_vm_123_name'),'_NIC')]",
+            "location": "canadacentral",
+            "tags": {
+                "default-vm": "default-vm"
+            },
+            "kind": "Regular",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('virtualMachines_template_vm_123_name')), '/ipConfigurations/ipconfig1')]",
+                        "etag": "W/\"bcf8d211-734c-41e0-a119-aee96b842e34\"",
+                        "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_virtual-network-here_externalid'), '/subnets/hgvmnet-server')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "nicType": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2022-08-01",
+            "name": "[parameters('virtualMachines_template_vm_123_name')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('virtualMachines_template_vm_123_name'),'_NIC'))]"
+            ],
+            "tags": {
+                "default-vm": "default-vm"
+            },
+            "zones": [
+                "1"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2ms"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2022-datacenter-azure-edition",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_template_vm_123_name'), '_OsDisk_1')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        },
+                        "deleteOption": "Delete",
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[concat(parameters('virtualMachines_template_vm_123_name'), '_DataDisk_1')]",
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "writeAcceleratorEnabled": false,
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            },
+                            "deleteOption": "Delete",
+                            "diskSizeGB": 128,
+                            "toBeDetached": false
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_template_vm_123_name')]",
+                    "adminUsername": "administrator",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true,
+                        "patchSettings": {
+                            "patchMode": "AutomaticByOS",
+                            "assessmentMode": "ImageDefault",
+                            "enableHotpatching": false
+                        },
+                        "enableVMAgentPlatformUpdates": false
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('virtualMachines_template_vm_123_name'),'_NIC'))]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                },
+                "licenseType": "Windows_Server"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2022-08-01",
+            "name": "[concat(parameters('virtualMachines_template_vm_123_name'), '/joindomain')]",
+            "location": "canadacentral",
+            "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_template_vm_123_name'))]"],
+            "properties": {"publisher": "Microsoft.Compute",
+            "type": "JsonADDomainExtension",
+            "typeHandlerVersion": "1.3",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+                "Name": "[parameters('domainToJoin')]",
+                "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUser'))]",
+                "Restart": "true",
+                "Options": "3"},
+                "protectedSettings": {"Password": "[parameters('domainPassword')]"} 
+                }
+        }
+    ]
+}
