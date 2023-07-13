@@ -1,0 +1,19 @@
+#Azure Automation script used to restore soft deleted O365 users on a daily schedule
+
+#Variable string stored in the automation account and called to execute. Var contents commented out below. 
+#Import-Module MSOnline
+#Import-Module Orchestrator.AssetManagement.Cmdlets -ErrorAction SilentlyContinue
+#$credObject = Get-AutomationPSCredential -Name 'automationadmin'
+#Connect-MsolService -Credential $credObject
+
+$connect = Get-AutomationVariable -Name 'Connect-to-MSOnline'
+Invoke-Expression -Command $connect
+
+# Retrieve soft-deleted users
+$softDeletedUsers = Get-MsolUser -ReturnDeletedUsers -All
+
+# Restore soft-deleted users
+foreach ($user in $softDeletedUsers) {
+    $objectId = $user.ObjectId
+    Restore-MsolUser -ObjectId $objectId
+}
