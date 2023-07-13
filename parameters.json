@@ -1,0 +1,17 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_template_vm_123_name": {
+            "value": ""
+        },
+        "adminPassword": {
+                "reference": {
+                    "keyVault": {
+                        "id": "/subscriptions/Subscription-ID-Here/resourceGroups/Resource-Group-Here/providers/Microsoft.KeyVault/vaults/Key-Vault-Name-Here"
+                    },
+                "secretName": "administrator"
+            }
+        }
+    }
+}
